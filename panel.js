@@ -18,7 +18,7 @@ async function checkAuth() {
 
 // Escuchar cambios de sesión (ej. si cierran sesión en otra pestaña)
 supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_OUT' || !session) {
+    if (event === 'SIGNED_OUT') {
         window.location.href = 'login.html';
     }
 });
