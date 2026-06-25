@@ -1,13 +1,13 @@
 const SUPABASE_URL = 'https://oaytrikyhxqlmrmtvkls.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9heXRyaWt5aHhxbG1ybXR2a2xzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzY4NzMsImV4cCI6MjA5NzkxMjg3M30.E7s3EmxS6yWWkFCMJ_5nmRGH5EbRLqf8YBNBK5xV2ps';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let appointments = [];
 let services = [];
 let blocked = [];
 
 async function checkAuth() {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) {
         window.location.href = 'login.html';
         return;
@@ -17,7 +17,7 @@ async function checkAuth() {
 }
 
 // Escuchar cambios de sesión (ej. si cierran sesión en otra pestaña)
-supabase.auth.onAuthStateChange((event, session) => {
+supabaseClient.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_OUT') {
         window.location.href = 'login.html';
     }
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout-btn');
     if(logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
         });
     }
     
@@ -84,7 +84,7 @@ function initNavigation() {
 async function loadDashboardData() {
     const today = new Date().toISOString().split('T')[0];
     
-    const { data: allAppts } = await supabase
+    const { data: allAppts } = await supabaseClient
         .from('appointments')
         .select('*')
         .order('date', { ascending: true })
@@ -200,14 +200,14 @@ function renderUpcomingAppointments() {
 }
 
 async function updateStatus(id, newStatus) {
-    await supabase.from('appointments').update({ status: newStatus }).eq('id', id);
+    await supabaseClient.from('appointments').update({ status: newStatus }).eq('id', id);
     await loadDashboardData();
 }
 
 
 // === SERVICES ===
 async function loadServices() {
-    const { data } = await supabase.from('services').select('*').order('created_at');
+    const { data } = await supabaseClient.from('services').select('*').order('created_at');
     if(data) {
         services = data;
         const tbody = document.getElementById('services-table-body');
@@ -264,9 +264,9 @@ async function handleServiceSubmit(e) {
     const image_url = document.getElementById('service-image').value;
     
     if(id) {
-        await supabase.from('services').update({ title, description, icon, image_url }).eq('id', id);
+        await supabaseClient.from('services').update({ title, description, icon, image_url }).eq('id', id);
     } else {
-        await supabase.from('services').insert([{ title, description, icon, image_url }]);
+        await supabaseClient.from('services').insert([{ title, description, icon, image_url }]);
     }
     
     closeServiceModal();
@@ -275,14 +275,14 @@ async function handleServiceSubmit(e) {
 
 async function deleteService(id) {
     if(confirm('¿Estás seguro de eliminar este servicio?')) {
-        await supabase.from('services').delete().eq('id', id);
+        await supabaseClient.from('services').delete().eq('id', id);
         loadServices();
     }
 }
 
 // === AVAILABILITY ===
 async function loadAvailability() {
-    const { data } = await supabase.from('blocked_availability').select('*').order('date', { ascending: false });
+    const { data } = await supabaseClient.from('blocked_availability').select('*').order('date', { ascending: false });
     if(data) {
         blocked = data;
         const tbody = document.getElementById('availability-table-body');
@@ -327,7 +327,7 @@ async function handleAvailabilitySubmit(e) {
     start_time = start_time ? `${start_time}:00` : null;
     end_time = end_time ? `${end_time}:00` : null;
     
-    await supabase.from('blocked_availability').insert([{ date, start_time, end_time, reason }]);
+    await supabaseClient.from('blocked_availability').insert([{ date, start_time, end_time, reason }]);
     
     closeAvailabilityModal();
     loadAvailability();
@@ -335,7 +335,7 @@ async function handleAvailabilitySubmit(e) {
 
 async function deleteAvailability(id) {
     if(confirm('¿Eliminar este bloqueo?')) {
-        await supabase.from('blocked_availability').delete().eq('id', id);
+        await supabaseClient.from('blocked_availability').delete().eq('id', id);
         loadAvailability();
     }
 }
