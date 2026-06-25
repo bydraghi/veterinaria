@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración | VetCare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="panel.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-header">
+            <i class="ph-fill ph-paw-print"></i>
+            <div>
+                <span class="logo-title">VetCare</span>
+                <span class="logo-subtitle">Clínica Veterinaria</span>
+            </div>
+        </a>
+
+        <ul class="sidebar-menu">
+            <li><a href="#" class="nav-btn active" data-target="dashboard-section"><i class="ph ph-house"></i> Dashboard</a></li>
+            <li><a href="#" class="nav-btn" data-target="services-section"><i class="ph ph-paw-print"></i> Servicios</a></li>
+            <li><a href="#" class="nav-btn" data-target="availability-section"><i class="ph ph-calendar-x"></i> Disponibilidad</a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-avatar">
+                <i class="ph ph-user"></i>
+            </div>
+            <div class="user-info">
+                <h4>Administrador</h4>
+                <span id="user-email">Cargando...</span>
+            </div>
+            <button id="logout-btn" style="background:none; border:none; color:var(--danger); cursor:pointer; margin-left:auto; font-size:20px;" title="Cerrar sesión">
+                <i class="ph ph-sign-out"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="topbar-title">
+                <h1 id="page-title">Bienvenido, Administrador</h1>
+                <p id="page-subtitle">Aquí tienes un resumen de las citas de hoy.</p>
+            </div>
+            <div class="topbar-actions">
+                <button class="notification-btn">
+                    <i class="ph ph-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <div class="clinic-selector">
+                    VetCare Clínica Veterinaria <i class="ph ph-caret-down"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="content-area active">
+            <div class="dashboard-grid">
+                <div class="left-col">
+                    <!-- Stats -->
+                    <div class="stats-row">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-blue-light"><i class="ph ph-calendar-blank"></i></div>
+                            <div class="stat-info">
+                                <h3>Citas hoy</h3>
+                                <p class="stat-value" id="stat-today">0</p>
+                                <a href="#">Ver todas</a>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-yellow-light"><i class="ph ph-clock"></i></div>
+                            <div class="stat-info">
+                                <h3>Pendientes</h3>
+                                <p class="stat-value" id="stat-pending">0</p>
+                                <a href="#">Ver todas</a>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-green-light"><i class="ph ph-check-circle"></i></div>
+                            <div class="stat-info">
+                                <h3>Confirmadas</h3>
+                                <p class="stat-value" id="stat-confirmed">0</p>
+                                <a href="#">Ver todas</a>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-red-light"><i class="ph ph-x-circle"></i></div>
+                            <div class="stat-info">
+                                <h3>Canceladas</h3>
+                                <p class="stat-value" id="stat-cancelled">0</p>
+                                <a href="#">Ver todas</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Appointments List -->
+                    <div class="appointments-section">
+                        <div class="section-header">
+                            <h2>Citas de hoy</h2>
+                            <div style="display: flex; gap: 16px;">
+                                <div class="tabs">
+                                    <button class="tab-btn active">Todas</button>
+                                    <button class="tab-btn">Pendientes</button>
+                                    <button class="tab-btn">Confirmadas</button>
+                                </div>
+                                <div class="search-box">
+                                    <i class="ph ph-magnifying-glass"></i>
+                                    <input type="text" placeholder="Buscar cita...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="appointments-grid" id="dashboard-appointments-list">
+                            <!-- Populated via JS -->
+                        </div>
+
+                        <button class="view-all-btn">
+                            <i class="ph ph-calendar"></i> Ver todas las citas
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar -->
+                <div class="right-sidebar">
+                    <div class="card">
+                        <h3 class="card-title">Próximas citas</h3>
+                        <div id="upcoming-appointments-list" style="display: flex; flex-direction: column; gap: 16px;">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services-section" class="content-area">
+            <div class="card">
+                <div class="section-header">
+                    <h2>Gestión de Servicios</h2>
+                    <button class="btn btn-primary" onclick="openServiceModal()">
+                        <i class="ph ph-plus"></i> Nuevo Servicio
+                    </button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Icono</th>
+                            <th>Título</th>
+                            <th>Descripción</th>
+                            <th>Imagen URL</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="services-table-body">
+                        <!-- Populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Availability Section -->
+        <section id="availability-section" class="content-area">
+            <div class="card">
+                <div class="section-header">
+                    <h2>Bloqueo de Disponibilidad</h2>
+                    <button class="btn btn-primary" onclick="openAvailabilityModal()">
+                        <i class="ph ph-plus"></i> Bloquear Fecha/Hora
+                    </button>
+                </div>
+                <p style="margin-bottom: 20px; color: var(--text-muted);">
+                    Los horarios bloqueados no estarán disponibles en el formulario de citas para los clientes.
+                </p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora Inicio</th>
+                            <th>Hora Fin</th>
+                            <th>Motivo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="availability-table-body">
+                        <!-- Populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for Services -->
+    <div class="modal-overlay" id="service-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="service-modal-title">Nuevo Servicio</h3>
+                <button class="close-modal" onclick="closeServiceModal()"><i class="ph ph-x"></i></button>
+            </div>
+            <form id="service-form">
+                <input type="hidden" id="service-id">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="service-title" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="service-desc" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Icono (clase Phosphor, ej. ph-stethoscope)</label>
+                    <input type="text" id="service-icon" required>
+                </div>
+                <div class="form-group">
+                    <label>URL de Imagen</label>
+                    <input type="text" id="service-image" placeholder="/src/image.png" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" onclick="closeServiceModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Availability -->
+    <div class="modal-overlay" id="availability-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="availability-modal-title">Bloquear Horario</h3>
+                <button class="close-modal" onclick="closeAvailabilityModal()"><i class="ph ph-x"></i></button>
+            </div>
+            <form id="availability-form">
+                <input type="hidden" id="avail-id">
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="avail-date" required>
+                </div>
+                <div class="form-group">
+                    <label>Hora Inicio (deja en blanco para todo el día)</label>
+                    <input type="time" id="avail-start">
+                </div>
+                <div class="form-group">
+                    <label>Hora Fin (deja en blanco para todo el día)</label>
+                    <input type="time" id="avail-end">
+                </div>
+                <div class="form-group">
+                    <label>Motivo</label>
+                    <input type="text" id="avail-reason" placeholder="Ej. Día festivo">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" onclick="closeAvailabilityModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="panel.js"></script>
+</body>
+</html>

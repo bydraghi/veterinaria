@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | VetCare Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --danger: #ef4444;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .login-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .logo { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--primary); margin-bottom: 24px; font-size: 32px; font-weight: 800; }
+        .login-card h2 { margin-bottom: 8px; font-size: 24px; font-weight: 700; }
+        .login-card p { color: var(--text-muted); margin-bottom: 24px; font-size: 14px; }
+        .form-group { margin-bottom: 16px; text-align: left; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 14px; outline: none; transition: border 0.2s; }
+        .form-group input:focus { border-color: var(--primary); }
+        .btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
+        .btn:hover { background: var(--primary-hover); }
+        .error-msg { color: var(--danger); font-size: 13px; margin-top: 12px; display: none; }
+        .toggle-mode { margin-top: 24px; font-size: 13px; color: var(--text-muted); }
+        .toggle-mode a { color: var(--primary); text-decoration: none; font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo">
+            <i class="ph-fill ph-paw-print"></i> VetCare
+        </div>
+        <h2 id="form-title">Iniciar Sesión</h2>
+        <p id="form-subtitle">Accede al panel de administración.</p>
+
+        <form id="auth-form">
+            <div class="form-group">
+                <label>Correo electrónico</label>
+                <input type="email" id="email" required placeholder="admin@vetcare.com">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn" id="submit-btn">Ingresar</button>
+            <div id="error-msg" class="error-msg"></div>
+        </form>
+
+        <div class="toggle-mode">
+            <span id="toggle-text">¿No tienes cuenta?</span> 
+            <a id="toggle-link">Regístrate como admin</a>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+</body>
+</html>

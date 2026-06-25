@@ -1,86 +1,61 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Navbar Scroll Effect
-    const navbar = document.getElementById('navbar');
+document.addEventListener('DOMContentLoaded', async () => {
+    // Supabase Init
+    const SUPABASE_URL = 'https://oaytrikyhxqlmrmtvkls.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9heXRyaWt5aHhxbG1ybXR2a2xzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzY4NzMsImV4cCI6MjA5NzkxMjg3M30.E7s3EmxS6yWWkFCMJ_5nmRGH5EbRLqf8YBNBK5xV2ps';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // Common UI (Navbar, Scroll, Parallax, IntersectionObserver)
+    const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
+        if (window.scrollY > 50) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
     });
 
-    // 2. Smooth Scrolling for Anchor Links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
             const targetId = this.getAttribute('href');
             if (targetId === '#') return;
-
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
-                // Offset for navbar
                 const offset = navbar.offsetHeight;
                 const elementPosition = targetElement.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - offset;
-
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
+                window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+            }
+            if(window.innerWidth <= 768) {
+                document.querySelector('.nav-links').style.display = 'none';
             }
         });
     });
 
-    // 3. Parallax Effect for Hero Background
     const parallaxPaws = document.getElementById('parallax-paws');
     window.addEventListener('scroll', () => {
-        const scrolled = window.scrollY;
-        if (parallaxPaws && scrolled < window.innerHeight) {
-            parallaxPaws.style.transform = `translateY(${scrolled * 0.3}px)`;
+        if (parallaxPaws && window.scrollY < window.innerHeight) {
+            parallaxPaws.style.transform = `translateY(${window.scrollY * 0.3}px)`;
         }
     });
 
-    // 4. Scroll Animations (Intersection Observer)
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.15
-    };
-
-    const observer = new IntersectionObserver((entries, observer) => {
+    const observer = new IntersectionObserver((entries, obs) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
-
-                // If it's a counter, trigger it
-                if (entry.target.classList.contains('nosotros-content')) {
-                    triggerCounters();
-                }
-
-                observer.unobserve(entry.target);
+                if (entry.target.classList.contains('nosotros-content')) triggerCounters();
+                obs.unobserve(entry.target);
             }
         });
-    }, observerOptions);
+    }, { root: null, rootMargin: '0px', threshold: 0.15 });
 
-    const animatedElements = document.querySelectorAll('.fade-up, .fade-in, .slide-in-left, .slide-in-right');
-    animatedElements.forEach(el => observer.observe(el));
+    document.querySelectorAll('.fade-up, .fade-in, .slide-in-left, .slide-in-right').forEach(el => observer.observe(el));
 
-    // 5. Counters Animation
     let countersTriggered = false;
-    const counters = document.querySelectorAll('.counter');
-
     function triggerCounters() {
         if (countersTriggered) return;
         countersTriggered = true;
-
-        counters.forEach(counter => {
+        document.querySelectorAll('.counter').forEach(counter => {
             const target = +counter.getAttribute('data-target');
-            const duration = 2000; // ms
-            const increment = target / (duration / 16); // 60fps
-
+            const increment = target / (2000 / 16);
             let current = 0;
-
             const updateCounter = () => {
                 current += increment;
                 if (current < target) {
@@ -90,152 +65,107 @@ document.addEventListener('DOMContentLoaded', () => {
                     counter.innerText = target;
                 }
             };
-
             updateCounter();
         });
     }
 
-    // 6. Services Interaction
-    const servicesData = {
-        consulta: {
-            title: "Consulta general",
-            desc: "Revisiones completas para evaluar la salud general de tu mascota, detectar cualquier problema a tiempo y brindarle la mejor calidad de vida.",
-            list: [
-                "Evaluación física completa",
-                "Diagnóstico preventivo",
-                "Recomendaciones personalizadas",
-                "Plan de vacunación"
-            ],
-            img: "/src/consulta.png"
-        },
-        vacunacion: {
-            title: "Vacunación",
-            desc: "Protege a tu mejor amigo contra enfermedades comunes y peligrosas. Contamos con los esquemas de vacunación más seguros y efectivos.",
-            list: [
-                "Esquema para cachorros",
-                "Refuerzos anuales",
-                "Vacuna antirrábica",
-                "Certificado de vacunación"
-            ],
-            img: "/src/vacuna.png"
-        },
-        cirugia: {
-            title: "Cirugía",
-            desc: "Quirófano equipado con tecnología de punta y anestesia segura para procedimientos quirúrgicos de rutina o especialidad.",
-            list: [
-                "Esterilización y castración",
-                "Cirugía de tejidos blandos",
-                "Monitoreo anestésico continuo",
-                "Cuidados postoperatorios"
-            ],
-            img: "/src/cirugia.png"
-        },
-        estetica: {
-            title: "Estética canina y felina",
-            desc: "Baño, corte de pelo y limpieza general para que tu mascota luzca increíble y mantenga una piel y pelaje saludables.",
-            list: [
-                "Baño medicado o cosmético",
-                "Corte de pelo por raza",
-                "Corte de uñas",
-                "Limpieza de oídos"
-            ],
-            img: "/src/estetica.png"
-        },
-        desparasitacion: {
-            title: "Desparasitación",
-            desc: "Tratamientos preventivos y curativos contra parásitos internos y externos para proteger a tu mascota y a tu familia.",
-            list: [
-                "Desparasitación interna",
-                "Control de pulgas y garrapatas",
-                "Exámenes coproparasitoscópicos",
-                "Asesoría preventiva"
-            ],
-            img: "/src/despara.png"
-        },
-        emergencias: {
-            title: "Emergencias",
-            desc: "Atención médica inmediata para casos críticos. Nuestro equipo está preparado para salvar vidas las 24 horas del día.",
-            list: [
-                "Atención inmediata 24/7",
-                "Estabilización del paciente",
-                "Hospitalización",
-                "Terapia intensiva"
-            ],
-            img: "/src/emergencia.png"
+    // Dynamic Services Loading
+    let servicesData = {};
+    async function loadServices() {
+        const { data } = await supabase.from('services').select('*').order('created_at');
+        if(data && data.length > 0) {
+            const listContainer = document.querySelector('.services-list');
+            const selectContainer = document.getElementById('servicio');
+            
+            listContainer.innerHTML = '';
+            selectContainer.innerHTML = '<option value="" disabled selected>Selecciona un servicio</option>';
+            
+            data.forEach((s, index) => {
+                // Populate data map
+                servicesData[s.id] = {
+                    title: s.title,
+                    desc: s.description,
+                    icon: s.icon,
+                    img: s.image_url
+                };
+                
+                // Add to list
+                const btn = document.createElement('button');
+                btn.className = `service-btn ${index === 0 ? 'active' : ''}`;
+                btn.setAttribute('data-id', s.id);
+                btn.innerHTML = `<i class="ph ${s.icon}"></i> ${s.title}`;
+                listContainer.appendChild(btn);
+                
+                // Add to select
+                const opt = document.createElement('option');
+                opt.value = s.title;
+                opt.innerText = s.title;
+                selectContainer.appendChild(opt);
+            });
+            
+            // Attach event listeners to new buttons
+            attachServiceEvents();
+            // Trigger first
+            document.querySelector('.service-btn').click();
         }
-    };
+    }
 
-    const serviceBtns = document.querySelectorAll('.service-btn');
-    const detailTitle = document.getElementById('detail-title');
-    const detailDesc = document.getElementById('detail-desc');
-    const detailList = document.getElementById('detail-list');
-    const serviceImg = document.getElementById('service-img');
-    const serviceDetailsContainer = document.getElementById('service-details');
+    function attachServiceEvents() {
+        const serviceBtns = document.querySelectorAll('.service-btn');
+        const detailTitle = document.getElementById('detail-title');
+        const detailDesc = document.getElementById('detail-desc');
+        const detailList = document.getElementById('detail-list');
+        const serviceImg = document.getElementById('service-img');
+        const serviceDetailsContainer = document.getElementById('service-details');
 
-    serviceBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active class from all
-            serviceBtns.forEach(b => b.classList.remove('active'));
-            // Add active class to clicked
-            btn.classList.add('active');
+        serviceBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                serviceBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
 
-            const id = btn.getAttribute('data-id');
-            const data = servicesData[id];
+                const id = btn.getAttribute('data-id');
+                const data = servicesData[id];
 
-            // Fade out
-            serviceDetailsContainer.style.opacity = 0;
-            serviceImg.style.opacity = 0;
+                serviceDetailsContainer.style.opacity = 0;
+                serviceImg.style.opacity = 0;
 
-            setTimeout(() => {
-                // Update content
-                detailTitle.innerText = data.title;
-                detailDesc.innerText = data.desc;
+                setTimeout(() => {
+                    detailTitle.innerText = data.title;
+                    detailDesc.innerText = data.desc;
+                    // We can just show a generic list or parse if description has bullets
+                    detailList.innerHTML = `
+                        <li><i class="ph ph-check"></i> Atención profesional</li>
+                        <li><i class="ph ph-check"></i> Trato humanitario</li>
+                        <li><i class="ph ph-check"></i> Equipos modernos</li>
+                    `;
+                    serviceImg.src = data.img;
 
-                detailList.innerHTML = '';
-                data.list.forEach(item => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<i class="ph ph-check"></i> ${item}`;
-                    detailList.appendChild(li);
-                });
-
-                serviceImg.src = data.img;
-
-                // Fade in
-                serviceDetailsContainer.style.opacity = 1;
-                serviceImg.style.opacity = 1;
-            }, 400); // 400ms transition
+                    serviceDetailsContainer.style.opacity = 1;
+                    serviceImg.style.opacity = 1;
+                }, 400);
+            });
         });
-    });
+    }
+    
+    // Load services immediately
+    loadServices();
 
-    // 7. Testimonials Carousel
+    // Testimonials Carousel
     const track = document.getElementById('testimonials-track');
-    const prevBtn = document.querySelector('.prev-arrow');
-    const nextBtn = document.querySelector('.next-arrow');
     const dotsContainer = document.getElementById('carousel-dots');
-
-    let currentIndex = 0;
-    let maxIndex = 0;
+    let currentIndex = 0, maxIndex = 0;
 
     function initCarousel() {
         const cardsToShow = window.innerWidth > 768 ? 3 : 1;
-        const totalCards = track.children.length;
-        maxIndex = totalCards - cardsToShow;
+        maxIndex = track.children.length - cardsToShow;
         if (maxIndex < 0) maxIndex = 0;
-
-        // Generate dots
         dotsContainer.innerHTML = '';
         for (let i = 0; i <= maxIndex; i++) {
             const dot = document.createElement('span');
-            dot.classList.add('dot');
-            if (i === currentIndex) dot.classList.add('active');
-            dot.addEventListener('click', () => {
-                currentIndex = i;
-                updateCarousel();
-                resetAutoPlay();
-            });
+            dot.className = `dot ${i === currentIndex ? 'active' : ''}`;
+            dot.addEventListener('click', () => { currentIndex = i; updateCarousel(); resetAutoPlay(); });
             dotsContainer.appendChild(dot);
         }
-
         if (currentIndex > maxIndex) currentIndex = maxIndex;
         updateCarousel();
     }
@@ -243,80 +173,116 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCarousel() {
         if (currentIndex < 0) currentIndex = maxIndex;
         if (currentIndex > maxIndex) currentIndex = 0;
-
-        const cardWidth = track.children[0].offsetWidth;
-        const gap = parseInt(window.getComputedStyle(track).gap) || 24;
-        const amountToMove = currentIndex * (cardWidth + gap);
-
-        // Remove transform if it was set previously
-        track.style.transform = 'none';
-        
-        // Use scrollLeft to scroll the container instead of translating it
-        track.scrollTo({
-            left: amountToMove,
-            behavior: 'smooth'
-        });
-
-        const dots = dotsContainer.querySelectorAll('.dot');
-        dots.forEach((dot, index) => {
-            if (index === currentIndex) {
-                dot.classList.add('active');
-            } else {
-                dot.classList.remove('active');
-            }
-        });
+        const amountToMove = currentIndex * (track.children[0].offsetWidth + (parseInt(window.getComputedStyle(track).gap) || 24));
+        track.scrollTo({ left: amountToMove, behavior: 'smooth' });
+        dotsContainer.querySelectorAll('.dot').forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));
     }
 
-    nextBtn.addEventListener('click', () => {
-        currentIndex++;
-        updateCarousel();
-        resetAutoPlay();
-    });
-
-    prevBtn.addEventListener('click', () => {
-        currentIndex--;
-        updateCarousel();
-        resetAutoPlay();
-    });
+    document.querySelector('.next-arrow').addEventListener('click', () => { currentIndex++; updateCarousel(); resetAutoPlay(); });
+    document.querySelector('.prev-arrow').addEventListener('click', () => { currentIndex--; updateCarousel(); resetAutoPlay(); });
 
     let autoPlayInterval;
     function resetAutoPlay() {
         clearInterval(autoPlayInterval);
-        autoPlayInterval = setInterval(() => {
-            currentIndex++;
-            updateCarousel();
-        }, 5000);
+        autoPlayInterval = setInterval(() => { currentIndex++; updateCarousel(); }, 5000);
     }
+    initCarousel(); resetAutoPlay();
+    window.addEventListener('resize', () => { setTimeout(initCarousel, 250); });
 
-    // Initialize on load
-    initCarousel();
-    resetAutoPlay();
+    // Contact Form & Availability Logic
+    const fechaInput = document.getElementById('fecha');
+    const horaSelect = document.getElementById('hora');
+    
+    // Set min date to today
+    const today = new Date();
+    // Use local time for setting min date
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    fechaInput.setAttribute('min', `${yyyy}-${mm}-${dd}`);
 
-    // Handle resize for carousel
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            initCarousel();
-        }, 250);
+    fechaInput.addEventListener('change', async (e) => {
+        const selectedDate = e.target.value;
+        if(!selectedDate) {
+            horaSelect.innerHTML = '<option value="" disabled selected>Selecciona una fecha primero</option>';
+            horaSelect.disabled = true;
+            return;
+        }
+
+        horaSelect.innerHTML = '<option value="" disabled selected>Cargando disponibilidad...</option>';
+        horaSelect.disabled = true;
+
+        // Fetch blocked availability and appointments for this date
+        const { data: blocked } = await supabase.from('blocked_availability').select('*').eq('date', selectedDate);
+        const { data: appts } = await supabase.from('appointments').select('*').eq('date', selectedDate);
+
+        // Generate time slots (9:00 to 19:00, every 30 mins)
+        const times = [];
+        for(let h = 9; h <= 19; h++) {
+            times.push(`${String(h).padStart(2,'0')}:00:00`);
+            if(h !== 19) times.push(`${String(h).padStart(2,'0')}:30:00`);
+        }
+
+        let isWholeDayBlocked = false;
+        let blockedIntervals = [];
+
+        if(blocked) {
+            blocked.forEach(b => {
+                if(!b.start_time && !b.end_time) isWholeDayBlocked = true;
+                else if(b.start_time && b.end_time) blockedIntervals.push({ start: b.start_time, end: b.end_time });
+                else if(b.start_time) blockedIntervals.push({ start: b.start_time, end: '23:59:59' });
+                else if(b.end_time) blockedIntervals.push({ start: '00:00:00', end: b.end_time });
+            });
+        }
+
+        if(isWholeDayBlocked) {
+            horaSelect.innerHTML = '<option value="" disabled selected>Día no disponible</option>';
+            return;
+        }
+
+        const availableTimes = times.filter(t => {
+            // Check if blocked by interval
+            const isBlocked = blockedIntervals.some(interval => t >= interval.start && t < interval.end);
+            if(isBlocked) return false;
+
+            // Check if already booked
+            const isBooked = appts && appts.some(a => a.time === t && a.status !== 'Cancelada');
+            if(isBooked) return false;
+
+            return true;
+        });
+
+        horaSelect.innerHTML = '<option value="" disabled selected>Selecciona una hora</option>';
+        if(availableTimes.length === 0) {
+            horaSelect.innerHTML = '<option value="" disabled selected>Sin horarios disponibles</option>';
+        } else {
+            availableTimes.forEach(t => {
+                const parts = t.split(':');
+                let hr = parseInt(parts[0]);
+                const mn = parts[1];
+                const ampm = hr >= 12 ? 'PM' : 'AM';
+                hr = hr % 12 || 12;
+                const displayTime = `${String(hr).padStart(2,'0')}:${mn} ${ampm}`;
+                
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.innerText = displayTime;
+                horaSelect.appendChild(opt);
+            });
+            horaSelect.disabled = false;
+        }
     });
 
-    // 8. Contact Form Validation
     const contactForm = document.getElementById('contact-form');
     const submitBtn = document.getElementById('submit-btn');
     const btnText = submitBtn.querySelector('.btn-text');
-    const btnIcon = submitBtn.querySelector('.btn-icon');
     const loader = submitBtn.querySelector('.loader');
     const successMsg = document.getElementById('success-msg');
 
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         let isValid = true;
-
-        // Validate fields
-        const fields = contactForm.querySelectorAll('input, select, textarea');
-        fields.forEach(field => {
+        contactForm.querySelectorAll('input, select, textarea').forEach(field => {
             if (!field.checkValidity()) {
                 isValid = false;
                 field.parentElement.classList.add('invalid');
@@ -327,52 +293,43 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Specific validations
-        const email = document.getElementById('correo');
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email.value)) {
-            isValid = false;
-            email.parentElement.classList.add('invalid');
-            email.classList.add('error');
-        }
-
         if (isValid) {
-            // Show loading state
             btnText.style.display = 'none';
-            btnIcon.style.display = 'none';
             loader.style.display = 'block';
             submitBtn.disabled = true;
 
-            // Simulate API call
+            const formData = {
+                name: document.getElementById('nombre').value,
+                phone: document.getElementById('telefono').value,
+                date: document.getElementById('fecha').value,
+                time: document.getElementById('hora').value,
+                service: document.getElementById('servicio').value,
+                message: document.getElementById('mensaje').value,
+            };
+
+            await supabase.from('appointments').insert([formData]);
+
+            loader.style.display = 'none';
+            btnText.style.display = 'inline-block';
+            btnText.innerText = 'Mensaje enviado';
+            submitBtn.style.backgroundColor = '#16a34a';
+            submitBtn.style.color = '#fff';
+            successMsg.style.display = 'block';
+
+            contactForm.reset();
+            horaSelect.innerHTML = '<option value="" disabled selected>Selecciona una fecha primero</option>';
+            horaSelect.disabled = true;
+
             setTimeout(() => {
-                loader.style.display = 'none';
-                btnText.style.display = 'inline-block';
-                btnIcon.style.display = 'inline-block';
-                btnText.innerText = 'Mensaje enviado';
-
-                submitBtn.classList.remove('btn-primary');
-                submitBtn.style.backgroundColor = '#16a34a';
-                submitBtn.style.color = '#fff';
-
-                successMsg.style.display = 'block';
-
-                contactForm.reset();
-
-                // Reset button after 3 seconds
-                setTimeout(() => {
-                    submitBtn.disabled = false;
-                    btnText.innerText = 'Enviar mensaje';
-                    submitBtn.classList.add('btn-primary');
-                    submitBtn.style.backgroundColor = '';
-                    successMsg.style.display = 'none';
-                }, 3000);
-            }, 1500);
+                submitBtn.disabled = false;
+                btnText.innerText = 'Enviar mensaje';
+                submitBtn.style.backgroundColor = '';
+                successMsg.style.display = 'none';
+            }, 3000);
         }
     });
 
-    // Input interaction for form
-    const formInputs = contactForm.querySelectorAll('input, select, textarea');
-    formInputs.forEach(input => {
+    contactForm.querySelectorAll('input, select, textarea').forEach(input => {
         input.addEventListener('input', () => {
             if (input.checkValidity()) {
                 input.parentElement.classList.remove('invalid');
@@ -381,12 +338,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Mobile Menu Toggle
     const mobileBtn = document.querySelector('.mobile-menu-btn');
     const navLinks = document.querySelector('.nav-links');
-
     mobileBtn.addEventListener('click', () => {
-        // Toggle mobile menu logic (simplified)
         if (navLinks.style.display === 'flex') {
             navLinks.style.display = 'none';
         } else {
