@@ -305,9 +305,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 time: document.getElementById('hora').value,
                 service: document.getElementById('servicio').value,
                 message: document.getElementById('mensaje').value,
+                status: 'Pendiente'
             };
 
-            await supabase.from('appointments').insert([formData]);
+            const { error } = await supabase.from('appointments').insert([formData]);
+
+            if (error) {
+                console.error("Error al guardar la cita:", error);
+                alert("Ocurrió un error. Por favor intenta de nuevo.");
+                submitBtn.disabled = false;
+                btnText.style.display = 'inline-block';
+                loader.style.display = 'none';
+                return;
+            }
 
             loader.style.display = 'none';
             btnText.style.display = 'inline-block';
