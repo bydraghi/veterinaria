@@ -586,3 +586,107 @@ body {
   gap: 12px;
   margin-top: 24px;
 }
+
+/* Calendar Styles */
+.cal-day {
+  padding: 8px 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dark);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto;
+}
+
+.cal-day:hover:not(.empty) {
+  background-color: var(--bg-color);
+}
+
+.cal-day.active {
+  background-color: var(--primary);
+  color: white;
+}
+
+.cal-day.empty {
+  cursor: default;
+}
+
+.cal-day.has-appointment::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: var(--primary);
+  border-radius: 50%;
+}
+
+.cal-day.active.has-appointment::after {
+  background-color: white;
+}
+
+/* Recent Activity Styles */
+.view-all-link {
+  font-size: 13px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.activity-icon.new { background-color: #eff6ff; color: #3b82f6; }
+.activity-icon.confirmed { background-color: #f0fdf4; color: #22c55e; }
+.activity-icon.cancelled { background-color: #fef2f2; color: #ef4444; }
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-content h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+.activity-content p {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.activity-time {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
