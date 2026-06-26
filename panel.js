@@ -88,13 +88,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Search listener
+    const searchInput = document.querySelector('.search-box input');
+    if(searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const activeTab = document.querySelector('.tabs .tab-btn.active').innerText;
+            renderDashboardAppointments(activeTab, e.target.value.toLowerCase());
+        });
+    }
+    
     // Tab switching in Dashboard
     const tabs = document.querySelectorAll('.tabs .tab-btn');
     tabs.forEach(tab => {
         tab.addEventListener('click', (e) => {
             tabs.forEach(t => t.classList.remove('active'));
             e.target.classList.add('active');
-            renderDashboardAppointments(e.target.innerText);
+            const searchTerm = document.querySelector('.search-box input').value.toLowerCase();
+            renderDashboardAppointments(e.target.innerText, searchTerm);
         });
     });
 });
@@ -153,7 +163,8 @@ async function loadDashboardData() {
     
     // Keep the active tab when reloading real-time data
     const activeTab = document.querySelector('.tabs .tab-btn.active').innerText;
-    renderDashboardAppointments(activeTab);
+    const searchTerm = document.querySelector('.search-box input').value.toLowerCase();
+    renderDashboardAppointments(activeTab, searchTerm);
     
     renderUpcomingAppointments();
     renderRecentActivity();
@@ -199,10 +210,11 @@ window.selectDate = function(dateStr) {
         if(idx === 0) btn.classList.add('active');
         else btn.classList.remove('active');
     });
-    renderDashboardAppointments('Todas');
+    const searchTerm = document.querySelector('.search-box input').value.toLowerCase();
+    renderDashboardAppointments('Todas', searchTerm);
 }
 
-function renderDashboardAppointments(filterStatus) {
+function renderDashboardAppointments(filterStatus, searchTerm = '') {
     let filtered = appointments.filter(a => a.date === selectedFilterDate);
     
     if(filterStatus !== 'Todas') {
@@ -210,11 +222,19 @@ function renderDashboardAppointments(filterStatus) {
         filtered = filtered.filter(a => a.status === statusMap[filterStatus]);
     }
     
+    if(searchTerm) {
+        filtered = filtered.filter(a => 
+            (a.name && a.name.toLowerCase().includes(searchTerm)) || 
+            (a.phone && a.phone.toLowerCase().includes(searchTerm)) ||
+            (a.service && a.service.toLowerCase().includes(searchTerm))
+        );
+    }
+    
     const container = document.getElementById('dashboard-appointments-list');
     container.innerHTML = '';
     
     if(filtered.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted); grid-column: span 2;">No hay citas para mostrar en esta fecha.</p>';
+        container.innerHTML = '<p style="color:var(--text-muted); grid-column: span 2;">No hay citas para mostrar.</p>';
         return;
     }
     
@@ -227,6 +247,8 @@ function renderDashboardAppointments(filterStatus) {
         hours = hours % 12;
         hours = hours ? hours : 12;
         const timeStr = `${hours.toString().padStart(2, '0')}:${mins} ${ampm}`;
+        
+        const safeMsg = encodeURIComponent(a.message || 'Sin mensaje adicional');
         
         container.innerHTML += `
             <div class="appointment-card">
@@ -246,13 +268,17 @@ function renderDashboardAppointments(filterStatus) {
                     <button class="btn btn-cancel" onclick="confirmAction('${a.id}', 'Cancelada')" ${a.status === 'Cancelada' ? 'disabled style="opacity:0.5"' : ''}>
                         <i class="ph ph-x"></i> Cancelar
                     </button>
-                    <button class="btn btn-details" onclick="showAlert('Detalles de la Cita', 'Mensaje/Motivo:\\n${a.message || 'Sin mensaje adicional'}')">
+                    <button class="btn btn-details" onclick="showDetails('${safeMsg}')">
                         <i class="ph ph-eye"></i> Detalles
                     </button>
                 </div>
             </div>
         `;
     });
+}
+
+window.showDetails = function(encodedMsg) {
+    showAlert('Detalles de la Cita', 'Mensaje/Motivo:\\n' + decodeURIComponent(encodedMsg));
 }
 
 window.confirmAction = function(id, newStatus) {
@@ -432,7 +458,7 @@ async function handleServiceSubmit(e) {
         const { error: uploadError, data } = await supabaseClient.storage.from('images').upload(fileName, file);
 
         if (uploadError) {
-            showAlert('Error subiendo imagen', 'Verifica que el Bucket "images" exista y sea público. Detalle: ' + uploadError.message);
+            showAlert('Error subiendo imagen', 'Verifica que hayas añadido las Políticas RLS (Security > Policies) al Bucket "images" para permitir INSERT. Detalle: ' + uploadError.message);
             return;
         }
         
