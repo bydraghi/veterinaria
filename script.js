@@ -150,6 +150,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Load services immediately
     loadServices();
 
+    supabase.channel('custom-services-channel')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'services' }, payload => {
+            loadServices();
+        })
+        .subscribe();
+
     // Testimonials Carousel
     const track = document.getElementById('testimonials-track');
     const dotsContainer = document.getElementById('carousel-dots');
