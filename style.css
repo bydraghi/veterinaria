@@ -1013,7 +1013,19 @@ img {
     
     .hero { padding-top: 6rem; }
     .hero h1 { font-size: 2.5rem; }
-    .hero-features { flex-direction: column; gap: 1.5rem; align-items: center; }
+    .hero-features { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 1.5rem; 
+        justify-items: center; 
+    }
+    .feature-item { 
+        flex-direction: column; 
+        text-align: center; 
+        gap: 0.5rem; 
+    }
+    
+    .service-image { display: none; }
     
     .nosotros-layout { grid-template-columns: 1fr; }
     .stats-grid { grid-template-columns: 1fr 1fr; }

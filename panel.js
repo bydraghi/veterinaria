@@ -142,7 +142,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (viewAllActivity) {
         viewAllActivity.addEventListener('click', (e) => {
             e.preventDefault();
-            renderRecentActivity(100);
+            const list = document.getElementById('activity-list');
+            if (list.classList.contains('expanded')) {
+                list.classList.remove('expanded');
+                viewAllActivity.innerText = 'Ver toda la actividad';
+                renderRecentActivity();
+            } else {
+                list.classList.add('expanded');
+                viewAllActivity.innerText = 'Cerrar';
+                renderRecentActivity(100);
+            }
         });
     }
 });

@@ -721,3 +721,17 @@ body {
   color: var(--text-muted);
   margin-top: 4px;
 }
+
+.activity-list.expanded {
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 400px;
+}
+
+.activity-list.expanded .activity-item {
+  flex-direction: row;
+  text-align: left;
+  min-width: 0;
+}
+
